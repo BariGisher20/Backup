@@ -3,7 +3,7 @@ import requests
 import os
 
 
-vk_token = 'b3d3d411825d34f278bc76f7af9bb94365635ddb41fff1fe491fc09fd67066713f55047909035263ee408'
+vk_token = ''
 
 
 def get_photo(owner_id):
@@ -28,7 +28,7 @@ def get_photo(owner_id):
     return
 
 
-ya_token = "AQAAAABZrWRJAADLW-uwe-vKvEiduk62H2ZU4gg"
+ya_token = ""
 
 
 class YaUploader:
