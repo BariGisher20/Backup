@@ -1,12 +1,23 @@
 from pprint import pprint
 import requests
 import os
+import time
+from tqdm import tqdm
 
+mylist = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+for i in tqdm(mylist):
+    time.sleep(1)
 
 vk_token = ''
 
 
-def get_photo(owner_id):
+def create_local_directory():
+    path = 'images'
+    os.mkdir(path)
+
+
+def get_photo(owner_id, directory):
     url_vk = 'https://api.vk.com/method/photos.get'
     params_vk = {
         'access_token': vk_token,
@@ -23,7 +34,7 @@ def get_photo(owner_id):
         for k, v in info.items():
             file_name = k + '.jpg'
             img_data = requests.get(el['sizes'][9]['url']).content
-            with open(file_name, 'wb') as file:
+            with open(f'{directory}/{file_name}', 'wb') as file:
                 file.write(img_data)
     return
 
@@ -37,8 +48,8 @@ class YaUploader:
 
     def get_headers(self):
         return {
-        'Content-Type': 'application/json',
-        'Authorization': 'OAuth {}'.format(self.token)
+            'Content-Type': 'application/json',
+            'Authorization': 'OAuth {}'.format(self.token)
         }
 
     def get_files_list(self):
@@ -66,35 +77,21 @@ class YaUploader:
         r = requests.put(url=url, params=params, headers=headers)
         res = r.json()
 
-    def upload_files_to_disk(self, directory):
+    def upload_files_to_disk(self, disk_file_path, file_name):
         self.create_directory('Photo_vk')
-        files = os.listdir(directory)
-        upload_photo_url = 'https://cloud-api.yandex.net/v1/disk/resources/upload'
-        for file_name in files:
-            with open(f'{directory}/{file_name}', 'rb') as file:
-                href = self._get_upload_link(disk_file_path=directory).get('href', '')
-                headers = {
-                    "Accept": "application/json",
-                    "Authorization": "OAuth " + ya_token
-                }
-                params = {
-                    'path': href,
-                    'url': file_name
-                }
-                response = requests.post(url=upload_photo_url, data=file, headers=headers, params=params)
-                # response = requests.post(href, data=file)
-                # response.raise_for_status()
-                if response.status_code == 201:
-                    pprint('Success')
-                else:
-                    pprint('False')
-                return response
+        href = self._get_upload_link(disk_file_path=disk_file_path).get('href', '')
+        response = requests.put(url=href, data=open(file_name, 'rb'))
+        if response.status_code == 201:
+            pprint('Success')
+        else:
+            pprint('False')
 
 
 if __name__ == '__main__':
+    create_local_directory()
+    get_photo(310885834, 'images')
     ya = YaUploader(token=ya_token)
-    pprint(ya.upload_files_to_disk('images'))
-
-
-
-
+    ya.upload_files_to_disk('Photo_vk/26.jpg', 'images/26.jpg')
+    ya.upload_files_to_disk('Photo_vk/29.jpg', 'images/29.jpg')
+    ya.upload_files_to_disk('Photo_vk/6.jpg', 'images/6.jpg')
+    ya.upload_files_to_disk('Photo_vk/34.jpg', 'images/34.jpg')
